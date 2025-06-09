@@ -5,48 +5,130 @@
  * @date 19 Jan 2019
  */
 
+#include "command.h"
+#include "customer.h"
+#include "movie.h"
+#include "store.h"
+#include <cassert>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <fstream>
-#include <cassert>
 
 using namespace std;
 
-void testStore1() {
-  cout << "Start testStore1" << endl;
-  // Should do something more, but lets just read files
-  // since each implementation will
-  string cfile = "testcommands-1.txt";
-  stringstream out;
-  ifstream fs(cfile);
-  assert(fs.is_open());
-  char commandType;
-  string discard;
-  while (fs >> commandType) {
-    out << commandType;
-    getline(fs, discard);
-  }
-  fs.close();
-  string result = "IHHBRIBBIH";
-  assert(out.str() == result);
-  cout << "End testStore1" << endl;
-}
-
-void testStore2() {
-  cout << "Start testStore2" << endl;
-  cout << "End testStore2" << endl;
-}
-
-void testStoreFinal() {
+void processMovieData() {
   cout << "=====================================" << endl;
-  cout << "Start testStoreFinal" << endl;
-  cout << "End testStoreFinal" << endl;
+  cout << "Start processMovieData" << endl;
+  ifstream file("data4movies.txt");
+  assert(file.is_open());
+
+  string line;
+  while (getline(file, line)) {
+
+    if (line.empty()) {
+      continue;
+    }
+
+    Movie *m = MovieFactory::create(line);
+    if (m == nullptr) {
+      continue;
+    }
+
+    Store::getInstance().addMovieToInventory(m);
+  }
+
+  file.close();
+  cout << "End processMovieData" << endl;
+  cout << "=====================================" << endl;
+}
+
+void processCustomerData() {
+  cout << "=====================================" << endl;
+  cout << "Start processCustomerData" << endl;
+  ifstream file("data4customers.txt");
+  assert(file.is_open());
+
+  string line;
+  while (getline(file, line)) {
+
+    if (line.empty()) {
+      continue;
+    }
+
+    Customer *c = new Customer(line);
+
+    Store::getInstance().registerCustomer(c);
+  }
+
+  file.close();
+  cout << "End processCustomerData" << endl;
+  cout << "=====================================" << endl;
+}
+
+void processCommandsSmall() {
+  cout << "=====================================" << endl;
+  cout << "Start processCommandsSmall" << endl;
+  ifstream file("testcommands-1.txt");
+  assert(file.is_open());
+
+  string line;
+  while (getline(file, line)) {
+
+    if (line.empty()) {
+      continue;
+    }
+
+    Command *c = CommandFactory::create(line);
+    if (c == nullptr) {
+      continue;
+    }
+
+    if (!c->discard) {
+      c->execute();
+    }
+
+    delete c;
+  }
+
+  file.close();
+  cout << "End processCommandsSmall" << endl;
+  cout << "=====================================" << endl;
+}
+
+void processCommandsLarge() {
+  cout << "=====================================" << endl;
+  cout << "Start processCommandsLarge" << endl;
+  ifstream file("data4commands.txt");
+  assert(file.is_open());
+
+  string line;
+  while (getline(file, line)) {
+
+    if (line.empty()) {
+      continue;
+    }
+
+    Command *c = CommandFactory::create(line);
+    if (c == nullptr) {
+      continue;
+    }
+
+    if (!c->discard) {
+      c->execute();
+    }
+
+    delete c;
+  }
+
+  file.close();
+  cout << "End processCommandsLarge" << endl;
   cout << "=====================================" << endl;
 }
 
 void testAll() {
-  testStore1();
-  testStore2();
-  testStoreFinal();
+  processMovieData();
+  processCustomerData();
+  // processCommandsSmall();
+  processCommandsLarge();
 }
